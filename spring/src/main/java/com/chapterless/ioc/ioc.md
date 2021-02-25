@@ -8,8 +8,8 @@ Spring最基本的功能是作为Bean的管理工具，包括被管理Bean的信
 + BeanDefinition.ROLE_INFRASTRUCTURE 基础设施Bean角色，目前已知使用方式:PointcutAdvisor或者IntroductionAdvisor（或者子接口）实现类想要生效时需通过@Role注解指定为该角色，否则默认ROLE_APPLICATION级别将不会被注册为切面，只是一个普通Bean
 #### 1.1.2 Bean Scope
 ##### 1.1.2.1 传统意义上的Scope
-+ ConfigurableBeanFactory.SCOPE_SINGLETON 单例，任何时间从BeanFactory获取都是同一个Bean，Bean的引用缓存在DefaultSingletonBeanRegistry中
-+ ConfigurableBeanFactory.SCOPE_PROTOTYPE 原型，任何时间从BeanFactory获取都是不同的Bean，Bean的引用不缓存
++ ConfigurableBeanFactory.SCOPE_SINGLETON 单例，每次从BeanFactory获取都是同一个Bean，Bean的引用缓存在DefaultSingletonBeanRegistry中
++ ConfigurableBeanFactory.SCOPE_PROTOTYPE 原型，每次从BeanFactory获取都是不同的Bean，Bean的引用不缓存
 + Request 请求，同一个请求内从BeanFactory获取都是同一个Bean,不同请求获得的Bean不同，Bean的引用存储在Request中
 + Session 会话，同一个会话内从BeanFactory获取都是同一个Bean,不同会话获得的Bean不同，Bean的引用存储在Session中
 + Global-Session 在一个全局的HttpSession中，容器会返回该Bean的同一个实例，仅在使用PortletContext时有效，Bean的引用存储在Portlet Context中
@@ -30,7 +30,6 @@ Spring最基本的功能是作为Bean的管理工具，包括被管理Bean的信
 > AbstractRefreshableTargetSource 可继承抽象类实现具体刷新方式，Spring中提供BeanFactoryRefreshableTargetSource,刷新方式为从BeanFactory重新获取Bean
 + Pooling  从对象池里面拿对象
 > AbstractPoolingTargetSource 可继承抽象类实现具体对象池的处理，Spring中提供CommonsPool2对象池实现方式
-+ ...
 > 无法通过简单的设置进行实现，生效时机为Bean被真正调用的时候，也就是说调用时通过代理先获取真实的Bean，再用获得的Bean进行数据处理
 
 #### 1.1.3 Bean LazyInit
@@ -71,6 +70,7 @@ Spring最基本的功能是作为Bean的管理工具，包括被管理Bean的信
 ###### 1.4.2.1.2 @Import注解中的ImportBeanDefinitionRegistrar接口实现类
 ##### 1.4.2.2 类中带@Bean注解的方法
 ##### 1.4.2.3 类上@EnableConfigurationProperties引入的配置类
+##### 1.4.2.4 @DependOn注解
 
 ### 1.5 通过扫描应用包获得的BeanDefinition注册
 + Scanner实现BeanDefinitionRegistryPostProcessor接口
