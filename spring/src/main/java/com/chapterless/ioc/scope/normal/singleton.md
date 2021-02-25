@@ -212,17 +212,16 @@
 ```
 >从三级缓存中查询是否有已经有对应的bean
 + singletonObjects中为已经初始化并处理过销毁方法的bean
-+ earlySingletonObjects中为已经实例化但是尚未初始化的bean
-+ singletonFactories中为已经实例化，但是后续确定需要创建代理的bean，并使用SingletonFactory进行包装
++ singletonFactories中为已经实例化，使用SingletonFactory进行包装后的实例，SingletonFactory中提供了提前创建代理的功能
++ earlySingletonObjects中为已经实例化但是尚未初始化的bean(也可能代理之后的对象)
 >按照多级缓存的意义，各级缓存之间存放的应该是相同的东西，这里三级存放的东西其实并不相同
 
 >单例可能会出现两个Bean之间循环引用的问题，在bean的生命周期中循环引用出现在进行依赖注入的时候。
 >但依赖注入分为构造方法注入、属性注入、方法注入，其中构造方法注入时出现循环引用时无法处理，Spring会报循环引用的错误，属性注入和方法注入时循环引用可以处理
 
 ## 循环引用不需要创建代理的情况
-> 假定A，B都不需要创建代理；A 依赖 B,B 依赖 A；A在实例化后，A会被放到earlySingletonObjects中，然后进行依赖注入，此时从BeanFactory获取B实例，开始进行B的生命周期处理
-> B在实例化后，B会被放到earlySingletonObjects中,然后进行依赖注入，此时从BeanFactory获取A实例，从上面的代码中可以看到，此时从earlySingletonObjects可以获取到A对象的引用，
-> 所以B的依赖注入完成，进行初始化后从earlySingletonObjects将B对象删除，并添加到singletonObjects中，然后返回给A的依赖注入操作，此时A也能完成依赖注入操作，
+> 假定A，B都不需要创建代理；A 依赖 B，B 依赖 A；A在实例化后，A会被放到singletonFactories中，然后进行依赖注入，此时从BeanFactory获取B实例，开始进行B的生命周期处理
+> B在实例化后，B会被放到singletonFactories中,然后进行依赖注入，此时从BeanFactory获取A实例，从上面的代码中可以看到，此时从singletonFactories可以获取到A的SingletonFactory的引用，
+> 将A的对象放到earlySingletonObjects，并将A的SingletonFactory从singletonFactories删除，
+> 此时B的依赖注入A完成，进行初始化后从singletonFactories将B的SingletonFactory删除，并添加到singletonObjects中，然后返回给A的依赖注入操作，此时A也能完成依赖注入操作，
 > 进行相应的初始化操作后从earlySingletonObjects将A对象删除，并添加到singletonObjects中。
-
-## 循环引用需要创建代理的情况
