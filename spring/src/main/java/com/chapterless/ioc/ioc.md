@@ -3,7 +3,7 @@ Spring最基本的功能是作为Bean的管理工具，包括被管理Bean的信
 ## 1.Bean信息注册
 ### 1.1 BeanDefinition
 #### 1.1.1 Bean Role
-+ BeanDefinition.ROLE_APPLICATION 普通Bean角色，非特殊Bean的默认值，标有@Component（及其继承者注解@Controller,@Service,@Repository,@Configuration）
++ BeanDefinition.ROLE_APPLICATION 普通Bean角色，非特殊Bean的默认值，标有@Component（及其继承者注解@Controller,@Service,@Repository）
 + BeanDefinition.ROLE_SUPPORT Spring代码中未见使用
 + BeanDefinition.ROLE_INFRASTRUCTURE 基础设施Bean角色，目前已知使用方式:PointcutAdvisor或者IntroductionAdvisor（或者子接口）实现类想要生效时需通过@Role注解指定为该角色，否则默认ROLE_APPLICATION级别将不会被注册为切面，只是一个普通Bean
 #### 1.1.2 Bean Scope

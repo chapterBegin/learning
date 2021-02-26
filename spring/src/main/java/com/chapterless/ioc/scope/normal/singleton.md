@@ -1,5 +1,5 @@
 #单例
->每次从BeanFactory获取都是同一个Bean，Bean的引用缓存在DefaultSingletonBeanRegistry中，先查询缓存，有就返回已有的，没有则开始生命周期处理
+>每次从BeanFactory获取都是同一个Bean，Bean的引用缓存在DefaultSingletonBeanRegistry中，先查询缓存，有就返回已有的，没有则进行Bean的创建工作
 >AbstractBeanFactory的doGetBean方法
 ```
 /**
@@ -219,9 +219,14 @@
 >单例可能会出现两个Bean之间循环引用的问题，在bean的生命周期中循环引用出现在进行依赖注入的时候。
 >但依赖注入分为构造方法注入、属性注入、方法注入，其中构造方法注入时出现循环引用时无法处理，Spring会报循环引用的错误，属性注入和方法注入时循环引用可以处理
 
-## 循环引用不需要创建代理的情况
+## 循环引用
 > 假定A，B都不需要创建代理；A 依赖 B，B 依赖 A；A在实例化后，A会被放到singletonFactories中，然后进行依赖注入，此时从BeanFactory获取B实例，开始进行B的生命周期处理
 > B在实例化后，B会被放到singletonFactories中,然后进行依赖注入，此时从BeanFactory获取A实例，从上面的代码中可以看到，此时从singletonFactories可以获取到A的SingletonFactory的引用，
 > 将A的对象放到earlySingletonObjects，并将A的SingletonFactory从singletonFactories删除，
 > 此时B的依赖注入A完成，进行初始化后从singletonFactories将B的SingletonFactory删除，并添加到singletonObjects中，然后返回给A的依赖注入操作，此时A也能完成依赖注入操作，
-> 进行相应的初始化操作后从earlySingletonObjects将A对象删除，并添加到singletonObjects中。
+> 进行相应的初始化操作后从earlySingletonObjects将A对象删除，并将A添加到singletonObjects中。
+
+## 需要三个Map进行缓存的原因
++ 状态区分
++ 避免同一个bean多次代理返回不同的代理对象用于依赖注入（先查询earlySignletoneObjects再查询singletonFactories）
+
