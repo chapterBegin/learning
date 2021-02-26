@@ -1,5 +1,3 @@
-#单例
->每次从BeanFactory获取都是同一个Bean，Bean的引用缓存在DefaultSingletonBeanRegistry中，先查询缓存，有就返回已有的，没有则开始生命周期处理
 >AbstractBeanFactory的doGetBean方法
 ```
 /**
@@ -167,61 +165,12 @@
 		return adaptBeanInstance(name, beanInstance, requiredType);
 	}
 ```
->在对beanName进行相关处理之后首先就是进行单例缓存搜索
-```
-@Override
-	@Nullable
-	public Object getSingleton(String beanName) {
-		return getSingleton(beanName, true);
-	}
 
-	/**
-	 * Return the (raw) singleton object registered under the given name.
-	 * <p>Checks already instantiated singletons and also allows for an early
-	 * reference to a currently created singleton (resolving a circular reference).
-	 * @param beanName the name of the bean to look for
-	 * @param allowEarlyReference whether early references should be created or not
-	 * @return the registered singleton object, or {@code null} if none found
-	 */
-	@Nullable
-	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
-		// Quick check for existing instance without full singleton lock
-		Object singletonObject = this.singletonObjects.get(beanName);
-		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
-			singletonObject = this.earlySingletonObjects.get(beanName);
-			if (singletonObject == null && allowEarlyReference) {
-				synchronized (this.singletonObjects) {
-					// Consistent creation of early reference within full singleton lock
-					singletonObject = this.singletonObjects.get(beanName);
-					if (singletonObject == null) {
-						singletonObject = this.earlySingletonObjects.get(beanName);
-						if (singletonObject == null) {
-							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
-							if (singletonFactory != null) {
-								singletonObject = singletonFactory.getObject();
-								this.earlySingletonObjects.put(beanName, singletonObject);
-								this.singletonFactories.remove(beanName);
-							}
-						}
-					}
-				}
-			}
-		}
-		return singletonObject;
-	}
-```
->从三级缓存中查询是否有已经有对应的bean
-+ singletonObjects中为已经初始化并处理过销毁方法的bean
-+ singletonFactories中为已经实例化，使用SingletonFactory进行包装后的实例，SingletonFactory中提供了提前创建代理的功能
-+ earlySingletonObjects中为已经实例化但是尚未初始化的bean(也可能代理之后的对象)
->按照多级缓存的意义，各级缓存之间存放的应该是相同的东西，这里三级存放的东西其实并不相同
-
->单例可能会出现两个Bean之间循环引用的问题，在bean的生命周期中循环引用出现在进行依赖注入的时候。
->但依赖注入分为构造方法注入、属性注入、方法注入，其中构造方法注入时出现循环引用时无法处理，Spring会报循环引用的错误，属性注入和方法注入时循环引用可以处理
-
-## 循环引用不需要创建代理的情况
-> 假定A，B都不需要创建代理；A 依赖 B，B 依赖 A；A在实例化后，A会被放到singletonFactories中，然后进行依赖注入，此时从BeanFactory获取B实例，开始进行B的生命周期处理
-> B在实例化后，B会被放到singletonFactories中,然后进行依赖注入，此时从BeanFactory获取A实例，从上面的代码中可以看到，此时从singletonFactories可以获取到A的SingletonFactory的引用，
-> 将A的对象放到earlySingletonObjects，并将A的SingletonFactory从singletonFactories删除，
-> 此时B的依赖注入A完成，进行初始化后从singletonFactories将B的SingletonFactory删除，并添加到singletonObjects中，然后返回给A的依赖注入操作，此时A也能完成依赖注入操作，
-> 进行相应的初始化操作后从earlySingletonObjects将A对象删除，并添加到singletonObjects中。
++ 从单例缓存中查询是否有已经完成生命周期的bean，或者已经实例化但尚未初始化的bean，有就直接返回
++ 如果单例缓存中没有则进行是否为Scope为原型bean，且正在创建过程中判断，如果是则抛出异常，Scope为原型的bean不支持循环依赖
++ 如果不是原型bean，则检查parentBeanFactory中是否有对应的bean，如果有则直接返回
++ parentBeanFactory中没有时开始bean的创建
++ 
++ 获取Bean的BeanDefinition，通过Scope确定处理方式
++ 如果为单例调用getSingleton方法进行单例对象创建
++ 如果为原型调用
