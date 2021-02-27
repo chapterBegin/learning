@@ -169,8 +169,8 @@
 + 从单例缓存中查询是否有已经完成生命周期的bean，或者已经实例化但尚未初始化的bean，有就直接返回
 + 如果单例缓存中没有则进行是否为Scope为原型bean，且正在创建过程中判断，如果是则抛出异常，Scope为原型的bean不支持循环依赖
 + 如果不是原型bean，则检查parentBeanFactory中是否有对应的bean，如果有则直接返回
-+ parentBeanFactory中没有时开始bean的创建
-+ 
-+ 获取Bean的BeanDefinition，通过Scope确定处理方式
++ parentBeanFactory中没有对应的bean，则开始Bean的create处理
++ 获取Bean的BeanDefinition，并通过BeanDefinition的parentName属性获得指定parentBean的BeanDefinition，两者进行合并后得到真实的BeanDefinition
++ 过Scope确定处理方式
 + 如果为单例调用getSingleton方法进行单例对象创建
 + 如果为原型调用
