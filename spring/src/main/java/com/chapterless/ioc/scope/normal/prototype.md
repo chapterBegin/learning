@@ -3,7 +3,7 @@
 
 + 原型的Bean不能参与循环引用，否则Spring启动将报错，所以BeanFactory中没有原型Bean的缓存。
 + 正常需要使用原型模式，需从controller开始就是原型模式，因为SpringMVC中，由DispatcherServlet进行请求分发时，都会重新从BeanFactory获取对应的ControllerBean，因此才能每次都使用新的Bean。
-+ 单例模式的ControllerBean可以依赖注入原型的Service Bean,但是调用的Service Bean都是同一个，因为依赖注入的就是那一个。
++ 单例模式的Controller Bean可以依赖注入原型的Service Bean,但是调用的Service Bean都是同一个，因为依赖注入的就是那一个。
 
 > RequestMappingHandlerMapping中handlerMethod的处理
 ```

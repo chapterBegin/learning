@@ -38,13 +38,13 @@ protected boolean isEligibleAdvisorBean(String beanName) {
 >AnnotationAwareAspectJAutoProxyCreator在判断PointcutAdvisor或者IntroductionAdvisor是否有资格成为有效的Advisor时，会调用BeanFactoryAdvisorRetrievalHelper的isEligibleBean方法
 ```
 /**
-	 * Determine whether the aspect bean with the given name is eligible.
-	 * <p>The default implementation always returns {@code true}.
-	 * @param beanName the name of the aspect bean
-	 * @return whether the bean is eligible
-	 */
-	protected boolean isEligibleBean(String beanName) {
-		return true;
-	}
+ * Determine whether the aspect bean with the given name is eligible.
+ * <p>The default implementation always returns {@code true}.
+ * @param beanName the name of the aspect bean
+ * @return whether the bean is eligible
+ */
+protected boolean isEligibleBean(String beanName) {
+    return true;
+}
 ```
 >直接返回true不进行角色判断
